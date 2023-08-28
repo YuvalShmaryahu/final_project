@@ -2,6 +2,107 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
+struct cord
+{
+    double value;
+    struct cord *next;
+};
+struct vector
+{
+    struct vector *next;
+    struct cord *cords;
+};
+
+void freeVectors(struct vector* headVec,int N)
+{
+    struct vector* tmp;
+    int cnt = 0;
+    while (cnt < N)
+    {
+        tmp = headVec;
+        headVec = headVec->next;
+        free(tmp);
+        cnt += 1;
+    }
+}
+
+void free_matrices(double ** array,int num){
+    int i;
+    i = 0;
+    while (i <num){
+        free(array[i]);
+        i += 1;
+    }
+    free(array);
+}
+
+struct vector free_vector(struct vector *vec){
+    struct vector *v_next = vec->next;
+    struct cord* cordin = vec->cords;
+    while (cordin != NULL){
+        struct cord* next = cordin->next;
+        free (cordin);
+        cordin = next;
+    }
+    return *v_next;
+}
+
+int get_len_from_list(struct vector *vec){
+    int i = 0;
+    struct vector *vecs = vec;
+    struct cord* cordin = vecs->cords;
+    while (cordin != NULL){
+        i += 1;
+        cordin = cordin->next;
+    }
+    return i;
+}
+double* turn_list_to_array(struct vector *vec,int d){
+    int i = 0 ;
+    double * val_of_vector = (double*) calloc(d,sizeof (double*));
+    struct vector *vecs = vec;
+    struct cord* cordin = vecs->cords;
+    while (i<d){
+        val_of_vector[i]=cordin->value;
+        cordin = cordin->next;
+        i += 1;
+    }
+    return val_of_vector;
+}
+
+
+double **createArrayfromInput(int N ,int dim_size,struct vector head,struct cord *a){
+    struct vector* v;
+    double** array_of_vectors;
+    double* vector_array;
+    int cnt;
+    array_of_vectors = (double**)calloc(N,sizeof(double*));
+    cnt = 0;
+    v = &head;
+    while (cnt<N){
+        struct vector *s;
+        s = v->next;
+        vector_array = turn_list_to_array(v,dim_size);
+        array_of_vectors[cnt] = vector_array;
+        cnt += 1;
+        free_vector(v);
+        v = s;
+    }
+    return array_of_vectors;
+}
+
+
+
+int number_of_input(struct vector * vectors){
+    int i = 0;
+    struct vector * ve = vectors;
+    while (ve->next != NULL){
+        i++;
+        ve = ve->next;
+    }
+    return i;
+}
 
 double euclidean_distance(double *v1, double *v2, int size) {
     double dist = 0.0;
@@ -48,4 +149,86 @@ double **ddg(double **X, int N) {\
     free(A);
 
     return D;
+}
+
+
+int main(int argc, char** argv )
+{
+    struct vector *head_vec, *curr_vec;
+    struct cord *head_cord, *curr_cord;
+    int check_second_argument, N, k, iter, dim_size;
+    char* first_argument;
+    char*second_argument;
+    double **array_of_vectors;
+    double n;
+    char c;
+    int state = 0;
+    if (argc != 3){
+        printf("An Error Has Occurred\n");
+        return 1;
+    }
+    first_argument = argv[1];
+    second_argument = argv[2];
+    if (strcmp(first_argument,"sym") == 0){
+        state = 1;
+    }
+    else if (strcmp(first_argument,"ddg") == 0){
+        state = 2;
+    }
+    else if (strcmp(first_argument,"norm") == 0){
+        state = 3;
+    }
+    else {
+        printf("Invalid state's name\n");
+        return 1;
+    }
+    int len_str = strlen(second_argument);
+    if (second_argument[len_str-1]!='t' || second_argument[len_str-2]!='x' || second_argument[len_str-3]!= 't' || second_argument[len_str-4]!='.'){
+        printf("Invalid file's name\n");
+        return 1;
+    }
+    /**************************************************************************************************************/
+    head_cord = malloc(sizeof(struct cord));
+    curr_cord = head_cord;
+    curr_cord->next = NULL;
+    head_vec = malloc(sizeof(struct vector));
+    curr_vec = head_vec;
+    curr_vec->next = NULL;
+    //FILE *fptr;
+    //fptr = fopen("C:\Users\yuval\CLionProjects\untitled","r");
+    //if (fptr == NULL){
+       // printf("Error! opening file");
+        //return 1;
+    //}
+
+    while (scanf("%lf%c", &n, &c) == 2)
+    {
+        if (c == '\n')
+        {
+            curr_cord->value = n;
+            curr_vec->cords = head_cord;
+            curr_vec->next = malloc(sizeof(struct vector));
+            curr_vec = curr_vec->next;
+            curr_vec->next = NULL;
+            head_cord = malloc(sizeof(struct cord));
+            curr_cord = head_cord;
+            curr_cord->next = NULL;
+            continue;
+        }
+
+        curr_cord->value = n;
+        curr_cord->next = malloc(sizeof(struct cord));
+        curr_cord = curr_cord->next;
+        curr_cord->next = NULL;
+    }
+    /******************************************************************************************************************/
+    N = number_of_input(head_vec);
+    dim_size = get_len_from_list(head_vec);
+    array_of_vectors = createArrayfromInput(N ,dim_size,*head_vec,head_cord);
+    free_matrices(array_of_vectors,N);
+    freeVectors(head_vec,N);
+    free(head_cord);
+    free(curr_vec);
+    return 0;
+
 }
