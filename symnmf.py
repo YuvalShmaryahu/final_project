@@ -161,6 +161,10 @@ def main():
             return 1
     else:
         print("Invalid file's name!")
+        return 1
+    list = data.tolist()
+
+
 
 
 
