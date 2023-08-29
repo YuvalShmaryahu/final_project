@@ -216,6 +216,60 @@ double** norm(double **X, int N, int dim){
     return W_normalized;
 }
 
+double **create_transpose(double **M,int row, int col){
+    double **tr_H = (double**)calloc(col, sizeof(double*));
+    for (int i = 0; i < col; ++i) {
+        tr_H[i] = (double*)calloc(row, sizeof(double));}
+    for (int i = 0; i<row; ++i){
+        for (int j = 0; j<col;++j){
+            tr_H[j][i]= M[i][j];
+        }
+    }
+    return tr_H;
+}
+
+double calc_eps(double **M, double **H,int n , int k){
+    double eps = 0;
+    for (int i=0; i<n; i++){
+        for (int j=0; j<k; j++){
+            double dif = M[i][j]-H[i][j];
+            eps += dif*dif;
+        }
+    }
+    return eps;
+}
+
+double **updateH(double **H ,double **W ,int iter ,int b ,int eps){
+    int cnt = 0;
+    int dist = 2*eps;
+    int n = sizeof(H)/sizeof(double *);
+    int k = sizeof(H[0])/sizeof(H[0][0]);
+    while ((dist >= eps) && (cnt <iter)){
+        double **WH_i = matrix_multiply(W,H,n,n,k);
+        double **tr_H = create_transpose(H,n,k);
+        double **H_Htr = matrix_multiply(H,tr_H,n,k,n);
+        double ** H_Htr_H = matrix_multiply(H_Htr,H,n,n,k);
+        double ** new_H = (double**)calloc(n, sizeof(double*));
+        for (int i = 0; i < n; ++i) {
+            new_H[i] = (double*)calloc(k, sizeof(double));}
+        for (int i = 0 ;i<n ;i++){
+            for (int j =0 ; j<n ;j++){
+                new_H[i][j]=H[i][j]*(1-b +b*(WH_i[i][j]/H_Htr_H[i][j]));
+            }
+        }
+        dist = calc_eps(new_H,H,n,k);
+        double **tmp = H;
+        H = new_H;
+        free_matrices(tmp,n);
+        free_matrices(WH_i,n);
+        free_matrices(tr_H,k);
+        free_matrices(H_Htr,n);
+        free_matrices(H_Htr_H,n);
+        cnt += 1;
+    }
+    return H;
+}
+
 double **symnmf(double** X, int N){
 
 }
