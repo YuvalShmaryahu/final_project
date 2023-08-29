@@ -5,6 +5,17 @@ import numpy as np
 from numpy import random
 np.random.seed(0)
 
+
+# Function to average the matrix entries
+def avg_matrix(M):
+    cols = len(M[0])
+    rows = len(M)
+    sum = 0
+    for i in range (rows):
+        for j in range (cols):
+            sum += M[i][j]
+    return (sum/(cols*rows))
+
 # Function to create the output by printing the final centroids
 def create_output(vectors_array):
     for vector in vectors_array:
@@ -56,6 +67,17 @@ def main():
         print("Invalid file's name!")
         return 1
     list = data.tolist()
+    n = len(list)
+
+    #   Initalizing H   #
+    ###########################################
+    k = first_argument
+    m = avg_matrix(list) ### need to be replaced with W
+    max_val_interval = math.sqrt(m/k)*2
+    H_min = [0 for i in range (k)]
+    H_max = [max_val_interval for i in range (k)]
+    H = np.random.uniform(low=H_min, high=H_max, size=(n,k))
+    ###########################################
 
 
 
