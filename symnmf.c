@@ -3,16 +3,21 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+
 struct cord
 {
     double value;
     struct cord *next;
 };
+
+
 struct vector
 {
     struct vector *next;
     struct cord *cords;
 };
+
+
 
 void freeVectors(struct vector* headVec,int N)
 {
@@ -48,6 +53,8 @@ struct vector free_vector(struct vector *vec){
     return *v_next;
 }
 
+
+
 int get_len_from_list(struct vector *vec){
     int i = 0;
     struct vector *vecs = vec;
@@ -58,6 +65,8 @@ int get_len_from_list(struct vector *vec){
     }
     return i;
 }
+
+
 double* turn_list_to_array(struct vector *vec,int d){
     int i = 0 ;
     double * val_of_vector = (double*) calloc(d,sizeof (double*));
@@ -104,6 +113,8 @@ int number_of_input(struct vector * vectors){
     return i;
 }
 
+
+
 double euclidean_distance(double *v1, double *v2, int size) {
     double dist = 0.0;
     for (int i = 0; i < size; ++i) {
@@ -112,6 +123,8 @@ double euclidean_distance(double *v1, double *v2, int size) {
     }
     return sqrt(dist);
 }
+
+
 
 double **sym(double **X, int N) {
     double **A = (double**)calloc(N, sizeof(double*));
@@ -125,6 +138,8 @@ double **sym(double **X, int N) {
     }
     return A;
 }
+
+
 
 double **ddg(double **X, int N) {\
     double sum;
@@ -149,6 +164,56 @@ double **ddg(double **X, int N) {\
     free(A);
 
     return D;
+}
+
+
+double **compute_D_inv_half(double **A, int N) {
+    double **D_inv_half = (double **)malloc(N * sizeof(double *));
+    for (int i = 0; i < N; ++i) {
+        D_inv_half[i] = (double *)malloc(N * sizeof(double));
+        for (int j = 0; j < N; ++j) {
+            D_inv_half[i][j] = (i == j) ? (1.0 / sqrt(A[i][j])) : 0.0;
+        }
+    }
+    return D_inv_half;
+}
+
+
+double **matrix_multiply(double **A, double **B, int rowsA, int colsA, int colsB) {
+    double **C = (double **)malloc(rowsA * sizeof(double *));
+    for (int i = 0; i < rowsA; ++i) {
+        C[i] = (double *)malloc(colsB * sizeof(double));
+        for (int j = 0; j < colsB; ++j) {
+            C[i][j] = 0.0;
+            for (int k = 0; k < colsA; ++k) {
+                C[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+    return C;
+}
+
+
+
+double** norm(double **X, int N){
+    double **A = sym(X, N);
+    double **D = ddg(X, N); // Using the ddg function
+    double **D_inv_half = compute_D_inv_half(D, N);
+
+    double **W = matrix_multiply(D_inv_half, A, N, N, N);
+    double **W_normalized = matrix_multiply(W, D_inv_half, N, N, N);
+
+    // Free the memory allocated for A, D, and D_inv_half
+    for (int i = 0; i < N; ++i) {
+        free(A[i]);
+        free(D[i]);
+        free(D_inv_half[i]);
+    }
+    free(A);
+    free(D);
+    free(D_inv_half);
+
+    return W_normalized;
 }
 
 
@@ -197,8 +262,8 @@ int main(int argc, char** argv )
     //FILE *fptr;
     //fptr = fopen("C:\Users\yuval\CLionProjects\untitled","r");
     //if (fptr == NULL){
-       // printf("Error! opening file");
-        //return 1;
+    // printf("Error! opening file");
+    //return 1;
     //}
 
     while (scanf("%lf%c", &n, &c) == 2)
