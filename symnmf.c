@@ -270,8 +270,10 @@ double **updateH(double **H ,double **W ,int iter ,int b ,int eps){
     return H;
 }
 
-double **symnmf(double** X, int N){
-
+double **symnmf(double** X,double **H, int n,int d,int iter,int b, int eps){
+    double **W = norm(X,n,d);
+    H = updateH(H,W,iter,b,eps);
+    return H;
 }
 
 void create_output(double **vectors_array, int num_of_clusters, int dim){
