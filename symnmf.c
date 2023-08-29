@@ -132,7 +132,7 @@ double **sym(double **X, int N) {
         A[i] = (double*)calloc(N, sizeof(double));
         for (int j = 0; j < N; ++j) {
             if (j != i) {
-                A[i][j] = exp((-euclidean_distance(X[i], X[j], N)) / 2);
+                A[i][j] = exp( -1 * ((euclidean_distance(X[i], X[j], N)) / 2));
             }
         }
     }
@@ -216,6 +216,28 @@ double** norm(double **X, int N){
     return W_normalized;
 }
 
+double **symnmf(double** X, int N){
+
+}
+
+void create_output(double **vectors_array, int num_of_clusters, int dim){
+    int i = 0;
+    while (i < num_of_clusters){
+        int j = 0;
+        while (j < dim){
+            double num = vectors_array[i][j];
+            if (j == dim-1){
+                printf("%.4f\n",num);
+            }
+            else {
+                printf("%.4f,",num);
+            }
+            j += 1;
+        }
+        i += 1;
+    }
+}
+
 
 int main(int argc, char** argv )
 {
@@ -290,6 +312,15 @@ int main(int argc, char** argv )
     N = number_of_input(head_vec);
     dim_size = get_len_from_list(head_vec);
     array_of_vectors = createArrayfromInput(N ,dim_size,*head_vec,head_cord);
+    if(state == 1){
+        create_output(sym(array_of_vectors, N),N, N);
+    }
+    if(state == 2){
+        create_output(ddg(array_of_vectors, N),N, N);
+    }
+    if(state == 3){
+        create_output(norm(array_of_vectors, N),N, N);
+    }
     free_matrices(array_of_vectors,N);
     freeVectors(head_vec,N);
     free(head_cord);
