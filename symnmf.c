@@ -115,24 +115,24 @@ int number_of_input(struct vector * vectors){
 
 
 
-double euclidean_distance(double *v1, double *v2, int size) {
+double euclidean_distance(double *v1, double *v2, int dim) {
     double dist = 0.0;
-    for (int i = 0; i < size; ++i) {
+    for (int i = 0; i < dim; ++i) {
         double diff = v1[i] - v2[i];
         dist += diff * diff;
     }
-    return sqrt(dist);
+    return dist;
 }
 
 
 
-double **sym(double **X, int N) {
+double **sym(double **X, int N, int dim) {
     double **A = (double**)calloc(N, sizeof(double*));
     for (int i = 0; i < N; ++i) {
         A[i] = (double*)calloc(N, sizeof(double));
         for (int j = 0; j < N; ++j) {
             if (j != i) {
-                A[i][j] = exp( -1 * ((euclidean_distance(X[i], X[j], N)) / 2));
+                A[i][j] = exp( -1 * ((euclidean_distance(X[i], X[j], dim)) / 2));
             }
         }
     }
@@ -141,9 +141,9 @@ double **sym(double **X, int N) {
 
 
 
-double **ddg(double **X, int N) {\
+double **ddg(double **X, int N, int dim) {\
     double sum;
-    double **A = sym(X, N);
+    double **A = sym(X, N, dim);
     double **D = (double **)malloc(N * sizeof(double *));
     for (int i = 0; i < N; ++i) {
         D[i] = (double *)malloc(N * sizeof(double));
@@ -195,9 +195,9 @@ double **matrix_multiply(double **A, double **B, int rowsA, int colsA, int colsB
 
 
 
-double** norm(double **X, int N){
-    double **A = sym(X, N);
-    double **D = ddg(X, N); // Using the ddg function
+double** norm(double **X, int N, int dim){
+    double **A = sym(X, N, dim);
+    double **D = ddg(X, N, dim); // Using the ddg function
     double **D_inv_half = compute_D_inv_half(D, N);
 
     double **W = matrix_multiply(D_inv_half, A, N, N, N);
@@ -313,13 +313,13 @@ int main(int argc, char** argv )
     dim_size = get_len_from_list(head_vec);
     array_of_vectors = createArrayfromInput(N ,dim_size,*head_vec,head_cord);
     if(state == 1){
-        create_output(sym(array_of_vectors, N),N, N);
+        create_output(sym(array_of_vectors, N,dim_size),N, N);
     }
     if(state == 2){
-        create_output(ddg(array_of_vectors, N),N, N);
+        create_output(ddg(array_of_vectors, N, dim_size),N, N);
     }
     if(state == 3){
-        create_output(norm(array_of_vectors, N),N, N);
+        create_output(norm(array_of_vectors, N, dim_size),N, N);
     }
     free_matrices(array_of_vectors,N);
     freeVectors(head_vec,N);
