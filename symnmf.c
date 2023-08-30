@@ -264,7 +264,7 @@ double **updateH(double **H ,double **W ,int iter ,double b ,double eps,int n, i
                 sum += (curr - H[i][j])*(curr - H[i][j]);
             }
         }
-        dist = sqrt(sum);
+        dist = sum;
         free_matrices(WH_i,n);
         free_matrices(tr_H,k);
         free_matrices(H_Htr,n);
@@ -364,7 +364,7 @@ int main(int argc, char** argv )
     }
     /**********Initalizing H***********/
     array_of_vectors = createArrayfromInput(N ,dim_size,*head_vec,head_cord);
-    double eps  = 0.01;
+    double eps  = 0.0001;
     create_output(symnmf(array_of_vectors,H,N,dim_size,300,0.5,eps,num_of_clusters),N,num_of_clusters);
     /*
     if(state == 1){
