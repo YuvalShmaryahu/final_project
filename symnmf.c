@@ -4,20 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct cord
-{
-    double value;
-    struct cord *next;
-};
-
-
-struct vector
-{
-    struct vector *next;
-    struct cord *cords;
-};
-
-
 void create_output(double **vectors_array, int num_of_clusters, int dim){
     int i = 0;
     while (i < num_of_clusters){
@@ -36,18 +22,6 @@ void create_output(double **vectors_array, int num_of_clusters, int dim){
     }
 }
 
-void freeVectors(struct vector* headVec,int N)
-{
-    struct vector* tmp;
-    int cnt = 0;
-    while (cnt < N)
-    {
-        tmp = headVec;
-        headVec = headVec->next;
-        free(tmp);
-        cnt += 1;
-    }
-}
 
 void free_matrices(double ** array,int num){
     int i;
@@ -58,78 +32,6 @@ void free_matrices(double ** array,int num){
     }
     free(array);
 }
-
-struct vector free_vector(struct vector *vec){
-    struct vector *v_next = vec->next;
-    struct cord* cordin = vec->cords;
-    while (cordin != NULL){
-        struct cord* next = cordin->next;
-        free (cordin);
-        cordin = next;
-    }
-    return *v_next;
-}
-
-
-
-int get_len_from_list(struct vector *vec){
-    int i = 0;
-    struct vector *vecs = vec;
-    struct cord* cordin = vecs->cords;
-    while (cordin != NULL){
-        i += 1;
-        cordin = cordin->next;
-    }
-    return i;
-}
-
-
-double* turn_list_to_array(struct vector *vec,int d){
-    int i = 0 ;
-    double * val_of_vector = (double*) calloc(d,sizeof (double*));
-    struct vector *vecs = vec;
-    struct cord* cordin = vecs->cords;
-    while (i<d){
-        val_of_vector[i]=cordin->value;
-        cordin = cordin->next;
-        i += 1;
-    }
-    return val_of_vector;
-}
-
-
-double **createArrayfromInput(int N ,int dim_size,struct vector head,struct cord *a){
-    struct vector* v;
-    double** array_of_vectors;
-    double* vector_array;
-    int cnt;
-    array_of_vectors = (double**)calloc(N,sizeof(double*));
-    cnt = 0;
-    v = &head;
-    while (cnt<N){
-        struct vector *s;
-        s = v->next;
-        vector_array = turn_list_to_array(v,dim_size);
-        array_of_vectors[cnt] = vector_array;
-        cnt += 1;
-        free_vector(v);
-        v = s;
-    }
-    return array_of_vectors;
-}
-
-
-
-int number_of_input(struct vector * vectors){
-    int i = 0;
-    struct vector * ve = vectors;
-    while (ve->next != NULL){
-        i++;
-        ve = ve->next;
-    }
-    return i;
-}
-
 
 
 double euclidean_distance(double *v1, double *v2, int dim) {
