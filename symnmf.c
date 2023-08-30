@@ -285,14 +285,69 @@ double **symnmf(double** X,double **H, int n,int d,int iter,double b, double eps
 
 int main(int argc, char** argv )
 {
-    struct vector *head_vec, *curr_vec;
-    struct cord *head_cord, *curr_cord;
-    int check_second_argument, N, k, iter, dim_size;
+
+    // Create a list to store the lines of the file.
+    char **lines = NULL;
+    int N = 0;
+
+    // Open the file.
+    FILE *fptr = fopen("C:\\Users\\yuval\\CLionProjects\\untitled\\cmake-build-debug\\input_1.txt", "r");
+    if (fptr == NULL) {
+        fprintf(stderr, "Error opening file.\n");
+        exit(1);
+    }
+
+
+    // Read the lines of the file one by one.
+    char line[100];
+    while (fgets(line, 100, fptr) != NULL) {
+        // Add the line to the list.
+        lines = realloc(lines, sizeof(char *) * (N+ 1));
+        lines[N] = strdup(line);
+        N++;
+    }
+
+    // Close the file.
+    fclose(fptr);
+
+    // Print the list of lines.
+    int dim_size = 1;
+    char ch = '0';
+    int j = 1;
+    while (ch != 0){
+        if (ch == ','){
+            dim_size += 1;
+        }
+        ch = line[j];
+        j += 1;
+    }
+    //creating array of vectors//
+    double **array_of_vectors = (double**)calloc(N,sizeof (double*));
+    for (int i = 0; i < N; ++i) {
+        array_of_vectors[i] = (double*)calloc(dim_size, sizeof(double));}
+    //creating array of vectors//
+
+    for (int i = 0; i < N; i++) {
+        int j = 0;
+        char * token = strtok(lines[i], ",");
+        while( token != NULL ) {
+            array_of_vectors[i][j] = atof(token);
+            token = strtok(NULL, ",");
+            j += 1;
+        }
+    }
+
+    // Free the memory allocated for the list.
+    for (int i = 0; i < N; i++) {
+        free(lines[i]);
+    }
+    free(lines);
+
+
+    int  iter;
+    double b;
     char* first_argument;
     char*second_argument;
-    double **array_of_vectors;
-    double n;
-    char c;
     int state = 0;
     if (argc != 3){
         printf("An Error Has Occurred\n");
@@ -318,43 +373,6 @@ int main(int argc, char** argv )
         printf("Invalid file's name\n");
         return 1;
     }
-    /**************************************************************************************************************/
-    head_cord = malloc(sizeof(struct cord));
-    curr_cord = head_cord;
-    curr_cord->next = NULL;
-    head_vec = malloc(sizeof(struct vector));
-    curr_vec = head_vec;
-    curr_vec->next = NULL;
-    //FILE *fptr;
-    //fptr = fopen("C:\Users\yuval\CLionProjects\untitled","r");
-    //if (fptr == NULL){
-    // printf("Error! opening file");
-    //return 1;
-    //}
-
-    while (scanf("%lf%c", &n, &c) == 2)
-    {
-        if (c == '\n')
-        {
-            curr_cord->value = n;
-            curr_vec->cords = head_cord;
-            curr_vec->next = malloc(sizeof(struct vector));
-            curr_vec = curr_vec->next;
-            curr_vec->next = NULL;
-            head_cord = malloc(sizeof(struct cord));
-            curr_cord = head_cord;
-            curr_cord->next = NULL;
-            continue;
-        }
-
-        curr_cord->value = n;
-        curr_cord->next = malloc(sizeof(struct cord));
-        curr_cord = curr_cord->next;
-        curr_cord->next = NULL;
-    }
-    /******************************************************************************************************************/
-    N = number_of_input(head_vec);
-    dim_size = get_len_from_list(head_vec);
     int num_of_clusters =3;
     /**********Initalizing H***********/
     double F[10][3] = {{0.1915330298744675, 0.24959733187150154, 0.210361251846407}, {0.19016136851628856, 0.14785329944976214, 0.22541365248570946}, {0.15271563802220298, 0.3112240926612766, 0.33631324115595573}, {0.13381907579681968, 0.2763078792454998, 0.18458154863277862}, {0.19824456780210784, 0.3230283644720431, 0.02479121114844506}, {0.03040766789311094, 0.007056114496527709, 0.29057995222458244}, {0.271572618312309, 0.30362966943935477, 0.3415326606165121}, {0.2789021408169059, 0.16105387320889544, 0.2724005822920931}, {0.041277153315709414, 0.2233290748462612, 0.05002954425034687}, {0.32968448956878926, 0.18212232294658148, 0.14471483877795904}};
@@ -363,9 +381,10 @@ int main(int argc, char** argv )
         H[i]=F[i];
     }
     /**********Initalizing H***********/
-    array_of_vectors = createArrayfromInput(N ,dim_size,*head_vec,head_cord);
     double eps  = 0.0001;
-    create_output(symnmf(array_of_vectors,H,N,dim_size,300,0.5,eps,num_of_clusters),N,num_of_clusters);
+    iter = 300;
+    b = 0.5;
+    create_output(symnmf(array_of_vectors,H,N,dim_size,iter,b,eps,num_of_clusters),N,num_of_clusters);
     /*
     if(state == 1){
         create_output(sym(array_of_vectors, N,dim_size),N, N);
@@ -378,9 +397,6 @@ int main(int argc, char** argv )
     }
      */
     free_matrices(array_of_vectors,N);
-    freeVectors(head_vec,N);
-    free(head_cord);
-    free(curr_vec);
     return 0;
 
 }
