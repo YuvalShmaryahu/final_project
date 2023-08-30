@@ -18,6 +18,23 @@ struct vector
 };
 
 
+void create_output(double **vectors_array, int num_of_clusters, int dim){
+    int i = 0;
+    while (i < num_of_clusters){
+        int j = 0;
+        while (j < dim){
+            double num = vectors_array[i][j];
+            if (j == dim-1){
+                printf("%.4f\n",num);
+            }
+            else {
+                printf("%.4f,",num);
+            }
+            j += 1;
+        }
+        i += 1;
+    }
+}
 
 void freeVectors(struct vector* headVec,int N)
 {
@@ -229,35 +246,31 @@ double **create_transpose(double **M,int row, int col){
     return tr_H;
 }
 
-double calc_eps(double **M, double **H,int n , int k){
-    double eps = 0;
-    for (int i=0; i<n; i++){
-        for (int j=0; j<k; j++){
-            double dif = M[i][j]-H[i][j];
-            eps += dif*dif;
-        }
-    }
-    return eps;
-}
 
 double **updateH(double **H ,double **W ,int iter ,double b ,double eps,int n, int k){
     int cnt = 0;
+    double curr = 0;
     double dist = 2*eps;
     while ((dist >= eps) && (cnt <iter)){
+        double sum = 0;
         double **WH_i = matrix_multiply(W,H,n,n,k);
         double **tr_H = create_transpose(H,n,k);
         double **H_Htr = matrix_multiply(H,tr_H,n,k,n);
         double ** H_Htr_H = matrix_multiply(H_Htr,H,n,n,k);
         for (int i = 0 ;i<n ;i++){
             for (int j =0 ; j<k ;j++){
-                H[i][j]=H[i][j]*(1-b +b*(WH_i[i][j]/H_Htr_H[i][j]));
+                curr = H[i][j];
+                H[i][j]=H[i][j]*((1-b) +b*((WH_i[i][j])/(H_Htr_H[i][j])));
+                sum += (curr - H[i][j])*(curr - H[i][j]);
             }
         }
+        dist = sqrt(sum);
         free_matrices(WH_i,n);
         free_matrices(tr_H,k);
         free_matrices(H_Htr,n);
         free_matrices(H_Htr_H,n);
         cnt += 1;
+
     }
     free_matrices(W,n);
     return H;
@@ -267,24 +280,6 @@ double **symnmf(double** X,double **H, int n,int d,int iter,double b, double eps
     double **W = norm(X,n,d);
     H = updateH(H,W,iter,b,eps,n,k);
     return H;
-}
-
-void create_output(double **vectors_array, int num_of_clusters, int dim){
-    int i = 0;
-    while (i < num_of_clusters){
-        int j = 0;
-        while (j < dim){
-            double num = vectors_array[i][j];
-            if (j == dim-1){
-                printf("%.4f\n",num);
-            }
-            else {
-                printf("%.4f,",num);
-            }
-            j += 1;
-        }
-        i += 1;
-    }
 }
 
 
@@ -369,7 +364,7 @@ int main(int argc, char** argv )
     }
     /**********Initalizing H***********/
     array_of_vectors = createArrayfromInput(N ,dim_size,*head_vec,head_cord);
-    double eps  = 0.0001;
+    double eps  = 0.01;
     create_output(symnmf(array_of_vectors,H,N,dim_size,300,0.5,eps,num_of_clusters),N,num_of_clusters);
     /*
     if(state == 1){
