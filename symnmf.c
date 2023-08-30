@@ -195,6 +195,7 @@ double **matrix_multiply(double **A, double **B, int rowsA, int colsA, int colsB
 
 
 
+
 double** norm(double **X, int N, int dim){
     double **A = sym(X, N, dim);
     double **D = ddg(X, N, dim); // Using the ddg function
@@ -239,40 +240,32 @@ double calc_eps(double **M, double **H,int n , int k){
     return eps;
 }
 
-double **updateH(double **H ,double **W ,int iter ,int b ,int eps){
+double **updateH(double **H ,double **W ,int iter ,double b ,double eps,int n, int k){
     int cnt = 0;
-    int dist = 2*eps;
-    int n = sizeof(H)/sizeof(double *);
-    int k = sizeof(H[0])/sizeof(H[0][0]);
+    double dist = 2*eps;
     while ((dist >= eps) && (cnt <iter)){
         double **WH_i = matrix_multiply(W,H,n,n,k);
         double **tr_H = create_transpose(H,n,k);
         double **H_Htr = matrix_multiply(H,tr_H,n,k,n);
         double ** H_Htr_H = matrix_multiply(H_Htr,H,n,n,k);
-        double ** new_H = (double**)calloc(n, sizeof(double*));
-        for (int i = 0; i < n; ++i) {
-            new_H[i] = (double*)calloc(k, sizeof(double));}
         for (int i = 0 ;i<n ;i++){
-            for (int j =0 ; j<n ;j++){
-                new_H[i][j]=H[i][j]*(1-b +b*(WH_i[i][j]/H_Htr_H[i][j]));
+            for (int j =0 ; j<k ;j++){
+                H[i][j]=H[i][j]*(1-b +b*(WH_i[i][j]/H_Htr_H[i][j]));
             }
         }
-        dist = calc_eps(new_H,H,n,k);
-        double **tmp = H;
-        H = new_H;
-        free_matrices(tmp,n);
         free_matrices(WH_i,n);
         free_matrices(tr_H,k);
         free_matrices(H_Htr,n);
         free_matrices(H_Htr_H,n);
         cnt += 1;
     }
+    free_matrices(W,n);
     return H;
 }
 
-double **symnmf(double** X,double **H, int n,int d,int iter,int b, int eps){
+double **symnmf(double** X,double **H, int n,int d,int iter,double b, double eps,int k){
     double **W = norm(X,n,d);
-    H = updateH(H,W,iter,b,eps);
+    H = updateH(H,W,iter,b,eps,n,k);
     return H;
 }
 
@@ -367,7 +360,18 @@ int main(int argc, char** argv )
     /******************************************************************************************************************/
     N = number_of_input(head_vec);
     dim_size = get_len_from_list(head_vec);
+    int num_of_clusters =3;
+    /**********Initalizing H***********/
+    double F[10][3] = {{0.1915330298744675, 0.24959733187150154, 0.210361251846407}, {0.19016136851628856, 0.14785329944976214, 0.22541365248570946}, {0.15271563802220298, 0.3112240926612766, 0.33631324115595573}, {0.13381907579681968, 0.2763078792454998, 0.18458154863277862}, {0.19824456780210784, 0.3230283644720431, 0.02479121114844506}, {0.03040766789311094, 0.007056114496527709, 0.29057995222458244}, {0.271572618312309, 0.30362966943935477, 0.3415326606165121}, {0.2789021408169059, 0.16105387320889544, 0.2724005822920931}, {0.041277153315709414, 0.2233290748462612, 0.05002954425034687}, {0.32968448956878926, 0.18212232294658148, 0.14471483877795904}};
+    double **H = (double**)calloc(10, sizeof(double*));
+    for (int i =0;i<10;i++){
+        H[i]=F[i];
+    }
+    /**********Initalizing H***********/
     array_of_vectors = createArrayfromInput(N ,dim_size,*head_vec,head_cord);
+    double eps  = 0.0001;
+    create_output(symnmf(array_of_vectors,H,N,dim_size,300,0.5,eps,num_of_clusters),N,num_of_clusters);
+    /*
     if(state == 1){
         create_output(sym(array_of_vectors, N,dim_size),N, N);
     }
@@ -377,6 +381,7 @@ int main(int argc, char** argv )
     if(state == 3){
         create_output(norm(array_of_vectors, N, dim_size),N, N);
     }
+     */
     free_matrices(array_of_vectors,N);
     freeVectors(head_vec,N);
     free(head_cord);
