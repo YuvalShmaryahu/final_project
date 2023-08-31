@@ -3,6 +3,7 @@ import sys
 import pandas as pd
 import numpy as np
 from numpy import random
+import symnmfsp
 np.random.seed(0)
 
 
@@ -57,9 +58,6 @@ def main():
     if (file[-4:] == ".txt"):
         try:
             data = np.genfromtxt(file, dtype=float, encoding=None, delimiter=",")
-            #len_of_text = len(data[0])
-            #cols = [i for i in range(len_of_text)]
-            #dataframe = pd.DataFrame(data, columns=cols)
         except:
             print("Invalid file's name!")
             return 1
@@ -67,16 +65,27 @@ def main():
         print("Invalid file's name!")
         return 1
     list = data.tolist()
+    H = [[1.0]]
     n = len(list)
-
-    #   Initalizing H   #
+    #   Initializing H   #
     ###########################################
     k = first_argument
-    m = avg_matrix(list) ### need to be replaced with W
-    max_val_interval = math.sqrt(m/k)*2
-    H_min = [0 for i in range (k)]
-    H_max = [max_val_interval for i in range (k)]
-    H = np.random.uniform(low=H_min, high=H_max, size=(n,k))
+    if (state == 1):
+        W = symnmfsp.fit(list,H,4,k)
+        m = avg_matrix(W)
+        max_val_interval = math.sqrt(m / k) * 2
+        H_min = [0 for i in range(k)]
+        H_max = [max_val_interval for i in range(k)]
+        H = np.random.uniform(low=H_min, high=H_max, size=(n, k))
+        X = symnmfsp.fit(list,H,1,k)
+        create_output(X)
+        return 0
+    else:
+        X = symnmfsp.fit(list, H, state, k)
+        create_output(X)
+        return 0
+    return 1
+
     ###########################################
 
 
