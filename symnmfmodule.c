@@ -5,12 +5,12 @@
 static PyObject* fit(PyObject *self, PyObject *args) {
     PyObject *first_matrix, *second_matrix, *current_vector;
     int dim, N, num_of_clusters, state;
-    double epsilon;
-    if (!PyArg_ParseTuple(args, "OOid", &first_matrix, &second_matrix, &state,&num_of_clusters)) {
+    if (!PyArg_ParseTuple(args, "OOii", &first_matrix, &second_matrix, &state,&num_of_clusters)) {
         Py_RETURN_NONE;
     }
     N = PyObject_Length(first_matrix);
     dim = PyObject_Length(PyList_GetItem(first_matrix, 0));
+  /* Get the value of the int. */
     int i, j;
     double **X = (double**)calloc(N,sizeof (double*));
     double **H = (double**)calloc(N,sizeof (double*));
@@ -34,7 +34,6 @@ static PyObject* fit(PyObject *self, PyObject *args) {
     }
     else if (state == 2){
         X = sym(X,N,dim);
-
     }
     else if (state == 3){
         X = ddg(X,N,dim);
@@ -54,8 +53,8 @@ static PyObject* fit(PyObject *self, PyObject *args) {
     }
     else {
         for (i = 0; i < N; i++){
-            PyObject* lst = PyList_New(dim);
-            for(j = 0; j < dim; j++){
+            PyObject* lst = PyList_New(N);
+            for(j = 0; j < N; j++){
                 PyList_SetItem(lst, j, Py_BuildValue("d", X[i][j]));
             }
             PyList_SetItem(result, i, lst);
@@ -84,14 +83,14 @@ static PyMethodDef symnmfMethods[]={
 
 static struct PyModuleDef symnmfModule = {
         PyModuleDef_HEAD_INIT,
-        "symnmfsp",
+        "mysymnmfsp",
         NULL,
         -1,
         symnmfMethods
 };
 
 PyMODINIT_FUNC
-PyInit_symnmfsp(void)
+PyInit_mysymnmfsp(void)
 {
     PyObject *m;
     m=PyModule_Create(&symnmfModule);
