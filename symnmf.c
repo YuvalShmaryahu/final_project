@@ -267,12 +267,12 @@ int main(int argc, char** argv )
         state = 3;
     }
     else {
-        printf("Invalid state's name\n");
+        printf("An Error Has Occurred\n");
         return 1;
     }
     int len_str = strlen(second_argument);
     if (second_argument[len_str-1]!='t' || second_argument[len_str-2]!='x' || second_argument[len_str-3]!= 't' || second_argument[len_str-4]!='.'){
-        printf("Invalid file's name\n");
+        printf("An Error Has Occurred\n");
         return 1;
     }
     int num_of_clusters =3;
