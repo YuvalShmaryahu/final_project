@@ -3,7 +3,7 @@ import sys
 import pandas as pd
 import numpy as np
 from numpy import random
-import symnmfsp
+import mysymnmfsp
 np.random.seed(0)
 
 
@@ -65,26 +65,27 @@ def main():
         print("Invalid file's name!")
         return 1
     list = data.tolist()
-    H = [[1.0]]
     n = len(list)
+    k = first_argument
+    H = [[0.0 for i in range(k)] for j in range(n)]
     #   Initializing H   #
     ###########################################
-    k = first_argument
     if (state == 1):
-        W = symnmfsp.fit(list,H,4,k)
+        W = mysymnmfsp.fit(list,H,4,k)
         m = avg_matrix(W)
         max_val_interval = math.sqrt(m / k) * 2
         H_min = [0 for i in range(k)]
         H_max = [max_val_interval for i in range(k)]
         H = np.random.uniform(low=H_min, high=H_max, size=(n, k))
-        X = symnmfsp.fit(list,H,1,k)
+        H = H.tolist()
+        X = mysymnmfsp.fit(list,H,1,k)
         create_output(X)
         return 0
     else:
-        X = symnmfsp.fit(list, H, state, k)
+        X = mysymnmfsp.fit(list, H, state, k)
         create_output(X)
         return 0
-    return 1
+    
 
     ###########################################
 
