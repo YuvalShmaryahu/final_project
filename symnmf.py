@@ -32,14 +32,14 @@ def main():
     lst_of_arguments = sys.argv
     # Check the number of command-line arguments
     if (len(lst_of_arguments) != 4 ):
-        print("An error has occurred")
+        print("An Error Has Occurred")
         return 1
     first_argument = lst_of_arguments[1]
     # Check if the first argument is a valid number of clusters
     if first_argument.isdigit():
         first_argument = int (first_argument)
     else:
-        print("Invalid number of clusters!")
+        print("An Error Has Occurred")
         return 1
     second_argument = lst_of_arguments[2]
     # Check if the third argument exists and validate it
@@ -52,17 +52,17 @@ def main():
     elif (second_argument == "norm"):
         state = 4
     else:
-        print("Invalid goal name!")
+        print("An Error Has Occurred")
         return 1
     file = lst_of_arguments[3]
     if (file[-4:] == ".txt"):
         try:
             data = np.genfromtxt(file, dtype=float, encoding=None, delimiter=",")
         except:
-            print("Invalid file's name!")
+            print("An Error Has Occurred")
             return 1
     else:
-        print("Invalid file's name!")
+        print("An Error Has Occurred")
         return 1
     list = data.tolist()
     n = len(list)
