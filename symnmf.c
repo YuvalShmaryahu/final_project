@@ -63,9 +63,9 @@ double **sym(double **X, int N, int dim) {
 double **ddg(double **X, int N, int dim) {\
     double sum;
     double **A = sym(X, N, dim);
-    double **D = (double **)malloc(N * sizeof(double *));
+    double **D = (double**)calloc(N, sizeof(double*));
     for (int i = 0; i < N; ++i) {
-        D[i] = (double *)malloc(N * sizeof(double));
+        D[i] = (double*)calloc(N, sizeof(double));
     }
 
     for (int i = 0; i < N; ++i) {
@@ -287,7 +287,6 @@ int main(int argc, char** argv )
     iter = 300;
     b = 0.5;
     create_output(symnmf(array_of_vectors,H,N,dim_size,iter,b,eps,num_of_clusters),N,num_of_clusters);
-    /*
     if(state == 1){
         create_output(sym(array_of_vectors, N,dim_size),N, N);
     }
@@ -297,7 +296,7 @@ int main(int argc, char** argv )
     if(state == 3){
         create_output(norm(array_of_vectors, N, dim_size),N, N);
     }
-     */
+    
     free_matrices(array_of_vectors,N);
     return 0;
 
