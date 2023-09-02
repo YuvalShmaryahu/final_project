@@ -15,6 +15,7 @@ def avg_matrix(M):
     for i in range (rows):
         for j in range (cols):
             sum += M[i][j]
+    print (sum/(cols*rows))
     return (sum/(cols*rows))
 
 # Function to create the output by printing the final centroids
