@@ -163,7 +163,7 @@ double **updateH(double **H ,double **W ,int iter ,double b ,double eps,int n, i
             for (int j =0 ; j<k ;j++){
                 curr = H[i][j];
                 H[i][j]=H[i][j]*((1-b) +b*((WH_i[i][j])/(H_Htr_H[i][j])));
-                sum += (curr - H[i][j])*(curr - H[i][j]);
+                sum += pow((curr - H[i][j]),2);
             }
         }
         dist = sum;
@@ -246,8 +246,6 @@ int main(int argc, char** argv )
     free(lines);
 
 
-    int  iter;
-    double b;
     char* first_argument;
     char*second_argument;
     int state = 0;
@@ -275,18 +273,6 @@ int main(int argc, char** argv )
         printf("An Error Has Occurred\n");
         return 1;
     }
-    int num_of_clusters =3;
-    /**********Initalizing H***********/
-    double F[10][3] = {{0.1915330298744675, 0.24959733187150154, 0.210361251846407}, {0.19016136851628856, 0.14785329944976214, 0.22541365248570946}, {0.15271563802220298, 0.3112240926612766, 0.33631324115595573}, {0.13381907579681968, 0.2763078792454998, 0.18458154863277862}, {0.19824456780210784, 0.3230283644720431, 0.02479121114844506}, {0.03040766789311094, 0.007056114496527709, 0.29057995222458244}, {0.271572618312309, 0.30362966943935477, 0.3415326606165121}, {0.2789021408169059, 0.16105387320889544, 0.2724005822920931}, {0.041277153315709414, 0.2233290748462612, 0.05002954425034687}, {0.32968448956878926, 0.18212232294658148, 0.14471483877795904}};
-    double **H = (double**)calloc(10, sizeof(double*));
-    for (int i =0;i<10;i++){
-        H[i]=F[i];
-    }
-    /**********Initalizing H***********/
-    double eps  = 0.0001;
-    iter = 300;
-    b = 0.5;
-    create_output(symnmf(array_of_vectors,H,N,dim_size,iter,b,eps,num_of_clusters),N,num_of_clusters);
     if(state == 1){
         create_output(sym(array_of_vectors, N,dim_size),N, N);
     }
