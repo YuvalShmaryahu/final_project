@@ -36,7 +36,8 @@ void free_matrices(double ** array,int num){
 
 double euclidean_distance(double *v1, double *v2, int dim) {
     double dist = 0.0;
-    for (int i = 0; i < dim; ++i) {
+    int i;
+    for (i=0; i < dim; ++i) {
         double diff = v1[i] - v2[i];
         dist += diff * diff;
     }
@@ -47,9 +48,11 @@ double euclidean_distance(double *v1, double *v2, int dim) {
 
 double **sym(double **X, int N, int dim) {
     double **A = (double**)calloc(N, sizeof(double*));
-    for (int i = 0; i < N; ++i) {
+    int i;
+    for (i = 0; i < N; ++i) {
+        int j;
         A[i] = (double*)calloc(N, sizeof(double));
-        for (int j = 0; j < N; ++j) {
+        for (j = 0; j < N; ++j) {
             if (j != i) {
                 A[i][j] = exp( -1 * ((euclidean_distance(X[i], X[j], dim)) / 2));
             }
@@ -62,22 +65,22 @@ double **sym(double **X, int N, int dim) {
 
 double **ddg(double **X, int N, int dim) {\
     double sum;
+    int k;
     double **A = sym(X, N, dim);
     double **D = (double**)calloc(N, sizeof(double*));
-    for (int i = 0; i < N; ++i) {
+    int i;
+    for (i = 0; i < N; ++i) {
         D[i] = (double*)calloc(N, sizeof(double));
     }
-
-    for (int i = 0; i < N; ++i) {
+    for (k = 0; k < N; ++k) {
+        int j;
         sum = 0.0;
-        for (int j = 0; j < N; ++j) {
-            sum += A[i][j];
+        for (j = 0; j < N; ++j) {
+            sum += A[k][j];
         }
-        D[i][i] = sum;
+        D[k][k] = sum;
     }
-
-    // Free the memory allocated for A
-    for (int i = 0; i < N; ++i) {
+    for (i = 0; i < N; ++i) {
         free(A[i]);
     }
     free(A);
@@ -87,10 +90,12 @@ double **ddg(double **X, int N, int dim) {\
 
 
 double **compute_D_inv_half(double **A, int N) {
+    int i;
     double **D_inv_half = (double **)malloc(N * sizeof(double *));
-    for (int i = 0; i < N; ++i) {
+    for (i = 0; i < N; ++i) {
+        int j;
         D_inv_half[i] = (double *)malloc(N * sizeof(double));
-        for (int j = 0; j < N; ++j) {
+        for (j = 0; j < N; ++j) {
             D_inv_half[i][j] = (i == j) ? (1.0 / sqrt(A[i][j])) : 0.0;
         }
     }
@@ -99,12 +104,15 @@ double **compute_D_inv_half(double **A, int N) {
 
 
 double **matrix_multiply(double **A, double **B, int rowsA, int colsA, int colsB) {
+    int i;
     double **C = (double **)malloc(rowsA * sizeof(double *));
-    for (int i = 0; i < rowsA; ++i) {
+    for (i = 0; i < rowsA; ++i) {
+        int j;
         C[i] = (double *)malloc(colsB * sizeof(double));
-        for (int j = 0; j < colsB; ++j) {
+        for (j = 0; j < colsB; ++j) {
+            int k;
             C[i][j] = 0.0;
-            for (int k = 0; k < colsA; ++k) {
+            for (k = 0; k < colsA; ++k) {
                 C[i][j] += A[i][k] * B[k][j];
             }
         }
@@ -116,15 +124,13 @@ double **matrix_multiply(double **A, double **B, int rowsA, int colsA, int colsB
 
 
 double** norm(double **X, int N, int dim){
+    int i;
     double **A = sym(X, N, dim);
-    double **D = ddg(X, N, dim); // Using the ddg function
+    double **D = ddg(X, N, dim); 
     double **D_inv_half = compute_D_inv_half(D, N);
-
     double **W = matrix_multiply(D_inv_half, A, N, N, N);
     double **W_normalized = matrix_multiply(W, D_inv_half, N, N, N);
-
-    // Free the memory allocated for A, D, and D_inv_half
-    for (int i = 0; i < N; ++i) {
+    for (i = 0; i < N; ++i) {
         free(A[i]);
         free(D[i]);
         free(D_inv_half[i]);
@@ -137,11 +143,13 @@ double** norm(double **X, int N, int dim){
 }
 
 double **create_transpose(double **M,int row, int col){
+    int i;
     double **tr_H = (double**)calloc(col, sizeof(double*));
-    for (int i = 0; i < col; ++i) {
+    for (i = 0; i < col; ++i) {
         tr_H[i] = (double*)calloc(row, sizeof(double));}
-    for (int i = 0; i<row; ++i){
-        for (int j = 0; j<col;++j){
+    for (i = 0; i<row; ++i){
+        int j;
+        for (j = 0; j<col;++j){
             tr_H[j][i]= M[i][j];
         }
     }
@@ -159,8 +167,10 @@ double **updateH(double **H ,double **W ,int iter ,double b ,double eps,int n, i
         double **tr_H = create_transpose(H,n,k);
         double **H_Htr = matrix_multiply(H,tr_H,n,k,n);
         double ** H_Htr_H = matrix_multiply(H_Htr,H,n,n,k);
-        for (int i = 0 ;i<n ;i++){
-            for (int j =0 ; j<k ;j++){
+        int i;
+        for (i = 0 ;i<n ;i++){
+            int j;
+            for (j =0 ; j<k ;j++){
                 curr = H[i][j];
                 H[i][j]=H[i][j]*((1-b) +b*((WH_i[i][j])/(H_Htr_H[i][j])));
                 sum += pow((curr - H[i][j]),2);
@@ -187,35 +197,48 @@ double **symnmf(double** X,double **H, int n,int d,int iter,double b, double eps
 
 int main(int argc, char** argv )
 {
+    char* first_argument;
+    char* second_argument;
+    char **lines;
+    int N;
+    int state;
+    FILE *fptr;
+    int dim_size;
+    char ch;
+    int i;
+    int j;
+    int len_str;
+    double **array_of_vectors;
+    char line[100];
+    state = 0;
+    if (argc != 3){
+        printf("An Error Has Occurred\n");
+        return 1;
+    }
+    
+    first_argument = argv[1];
+    second_argument = argv[2];
 
-    // Create a list to store the lines of the file.
-    char **lines = NULL;
-    int N = 0;
+    lines = NULL;
+    N = 0;
 
-    // Open the file.
-    FILE *fptr = fopen("C:\\Users\\yuval\\CLionProjects\\untitled\\cmake-build-debug\\input_1.txt", "r");
+    fptr = fopen(second_argument, "r");
     if (fptr == NULL) {
-        fprintf(stderr, "Error opening file.\n");
+        fprintf(stderr, "An Error Has Occurred\n");
         exit(1);
     }
 
-
-    // Read the lines of the file one by one.
-    char line[100];
     while (fgets(line, 100, fptr) != NULL) {
-        // Add the line to the list.
         lines = realloc(lines, sizeof(char *) * (N+ 1));
         lines[N] = strdup(line);
         N++;
     }
 
-    // Close the file.
     fclose(fptr);
 
-    // Print the list of lines.
-    int dim_size = 1;
-    char ch = '0';
-    int j = 1;
+    dim_size = 1;
+    ch = '0';
+    j = 1;
     while (ch != 0){
         if (ch == ','){
             dim_size += 1;
@@ -223,13 +246,10 @@ int main(int argc, char** argv )
         ch = line[j];
         j += 1;
     }
-    //creating array of vectors//
-    double **array_of_vectors = (double**)calloc(N,sizeof (double*));
-    for (int i = 0; i < N; ++i) {
+    array_of_vectors = (double**)calloc(N,sizeof (double*));
+    for (i = 0; i < N; ++i) {
         array_of_vectors[i] = (double*)calloc(dim_size, sizeof(double));}
-    //creating array of vectors//
-
-    for (int i = 0; i < N; i++) {
+    for (i = 0; i < N; i++) {
         int j = 0;
         char * token = strtok(lines[i], ",");
         while( token != NULL ) {
@@ -238,23 +258,11 @@ int main(int argc, char** argv )
             j += 1;
         }
     }
-
-    // Free the memory allocated for the list.
-    for (int i = 0; i < N; i++) {
+    for (i = 0; i < N; i++) {
         free(lines[i]);
     }
     free(lines);
 
-
-    char* first_argument;
-    char*second_argument;
-    int state = 0;
-    if (argc != 3){
-        printf("An Error Has Occurred\n");
-        return 1;
-    }
-    first_argument = argv[1];
-    second_argument = argv[2];
     if (strcmp(first_argument,"sym") == 0){
         state = 1;
     }
@@ -268,7 +276,7 @@ int main(int argc, char** argv )
         printf("An Error Has Occurred\n");
         return 1;
     }
-    int len_str = strlen(second_argument);
+    len_str = strlen(second_argument);
     if (second_argument[len_str-1]!='t' || second_argument[len_str-2]!='x' || second_argument[len_str-3]!= 't' || second_argument[len_str-4]!='.'){
         printf("An Error Has Occurred\n");
         return 1;
