@@ -1,1 +1,0 @@
-gcc -ansi -Wall -Wextra -Werror -pedantic-errors -lm
